@@ -1,5 +1,12 @@
 name: random-reviewer
-on: workflow_dispatch
+on:
+  pull_request:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      github_token:
+        default: asdasd
+
 jobs:
   random-reviewer:
     runs-on: ubuntu-latest
@@ -29,4 +36,5 @@ jobs:
           npm ci
       #
       - name: run random reviewer
+
         run: npm run reviewer

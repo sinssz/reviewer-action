@@ -1,4 +1,5 @@
-import * as github from "@actions/github";
+import { context, getOctokit } from "@actions/github";
+import { getInput } from "@actions/core";
 import * as fs from "fs";
 import * as path from "path";
 import * as yaml from "js-yaml";
@@ -7,12 +8,20 @@ import * as yaml from "js-yaml";
 const yml = path.join(__dirname, "../../", "reviewer.yml");
 
 function main() {
-  console.log("random job step start", github.context.payload.pull_request);
+  console.log("random job step start", context);
+  const token = getInput("github_token");
+  console.log("@@@@", token);
   const { reviewers } = getReviewers(yml) as {
     reviewers: { githubName: string; slackUserId: string }[];
   };
 
   if (reviewers.length > 0) {
+    // await githubClient.rest.pulls.requestReviewers({
+    //   owner: github.context.repo.owner,
+    //   repo: github.context.repo.repo,
+    //   pull_number: github.context.issue.number,
+    //   reviewers: [selectedReviewer.githubName],
+    // });
   }
 }
 
