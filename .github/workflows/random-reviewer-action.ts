@@ -43,6 +43,8 @@ function main() {
 
   const reviewers = getReviewers(candidates, 2);
 
+  console.log("reviewers : ", reviewers);
+
   reviewers.forEach(async (reviewer) => {
     await githubClient.rest.pulls.requestReviewers({
       owner: context.repo.owner,
