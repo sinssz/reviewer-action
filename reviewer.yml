@@ -1,6 +1,6 @@
 reviewers:
-  - githubName: 김신후
-    slackUserId: 김신후_slack
+  - githubName: sinssz
+    slackUserId: sinssz_slack
 
-  - githubName: 박정환
-    slackUserId: 박정환_slack
+  - githubName: test
+    slackUserId: test_slack
