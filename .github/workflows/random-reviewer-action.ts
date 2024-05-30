@@ -16,6 +16,7 @@ function main() {
   console.log("random job step start");
 
   const token = getInput("SECRET_GITHUB_TOKEN");
+  console.log("@@@@", token);
   const githubClient = getOctokit(token);
 
   const { reviewers } = getReviewers(yml) as {
