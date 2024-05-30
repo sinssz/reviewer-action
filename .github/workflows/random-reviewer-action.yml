@@ -36,5 +36,6 @@ jobs:
           npm ci
       #
       - name: run random reviewer
-
+        env:
+          github_token: ${{secrets.GITHUB_TOKEN}}
         run: npm run reviewer
