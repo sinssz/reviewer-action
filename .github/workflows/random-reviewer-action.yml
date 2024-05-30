@@ -34,13 +34,8 @@ jobs:
         run: |
           echo 'npm cache existed'
           npm ci
-
-      - name: Generate env
-        env:
-          github_token: ${{secrets.SECRET_GITHUB_TOKEN}}
-        run: |
-          echo "github_token=$github_token" >> .env
-
+      #
       - name: run random reviewer
-
+        env:
+          github_token: ${{secrets.GITHUB_TOKEN}}
         run: npm run reviewer
