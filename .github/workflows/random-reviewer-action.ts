@@ -15,7 +15,7 @@ const yml = path.join(__dirname, "../../", "reviewer.yml");
 function main() {
   console.log("random job step start");
 
-  const token = getInput("github_token");
+  const token = getInput("SECRET_GITHUB_TOKEN");
   const githubClient = getOctokit(token);
 
   const { reviewers } = getReviewers(yml) as {
