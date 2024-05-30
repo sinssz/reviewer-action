@@ -3,6 +3,7 @@ import { getInput, setFailed } from "@actions/core";
 import * as fs from "fs";
 import * as path from "path";
 import * as yaml from "js-yaml";
+import { Block, KnownBlock, WebClient } from "@slack/web-api";
 
 interface Reviewer {
   githubName: string;
@@ -15,16 +16,16 @@ const yml = path.join(__dirname, "../../", "reviewer.yml");
 function main() {
   console.log("random job step start");
 
-  const token =
+  const githubClientToken =
     getInput("github_token") || process.env.github_token?.toString();
 
-  if (!token) {
+  if (!githubClientToken) {
     setFailed("github client token is not set");
     return;
   }
 
-  const githubClient = getOctokit(token);
-  console.log("githubClient : ", githubClient);
+  const githubClient = getOctokit(githubClientToken);
+  console.log("context?.payload : ", context?.payload);
 
   const { codeOwners } = getCodeOwners(yml) as {
     codeOwners: Reviewer[];
@@ -58,44 +59,18 @@ function main() {
       slackUserId: reviewer.slackUserId,
     });
   });
-
-  // if (candidates.length > 0) {
-  //   const firstReviewer = getRandomReviewer(candidates);
-  //   candidates.splice(firstReviewer.index, 1);
-  //   const secondReviewer = getRandomReviewer(candidates);
-
-  //   [firstReviewer, secondReviewer].forEach(async (reviewer) => {
-  //     await githubClient.rest.pulls.requestReviewers({
-  //       owner: context.repo.owner,
-  //       repo: context.repo.repo,
-  //       pull_number: context.issue.number,
-  //       reviewers: [reviewer.githubName],
-  //     });
-
-  //     sendDirectMessage({
-  //       githubName: reviewer.githubName,
-  //       slackUserId: reviewer.slackUserId,
-  //     });
-  //   });
-  // }
 }
 
 const sendDirectMessage = async (reviewer: Reviewer) => {
-  console.log("Send Message!!");
-  // slackClient.chat.postMessage({
-  //   text: createMessage(github.context),
-  //   channel: reviewer.slackUserId,
-  // });
-};
+  const slackToken =
+    getInput("slack_token") || process.env.slack_token?.toString();
+  const slackClient = new WebClient(slackToken);
 
-// const getRandomReviewer = (candidates: Reviewer[]) => {
-//   const memberIndex = Math.floor(Math.random() * candidates.length);
-//   return {
-//     githubName: candidates[memberIndex].githubName,
-//     slackUserId: candidates[memberIndex].slackUserId,
-//     index: memberIndex,
-//   };
-// };
+  await slackClient.chat.postMessage({
+    channel: "U04LLUMDL31",
+    blocks: getSlackMessageBlock(reviewer.githubName),
+  });
+};
 
 // YAML 파일 읽기
 const getCodeOwners = (filePath: string) => {
@@ -120,6 +95,32 @@ const getReviewers = (candidates: Reviewer[], memberCnt: number) => {
   }
 
   return selectedElements;
+};
+
+const getSlackMessageBlock = (reviewer: string): (Block | KnownBlock)[] => {
+  console.log(
+    context?.payload?.pull_request?._links,
+    context?.payload?.pull_request?.user
+  );
+  return [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "리뷰어로 할당되었습니다!!🙏",
+      },
+    },
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `• PR 제목: ${context?.payload?.pull_request?.user.login} \n 
+        • 담당자: ${context?.payload?.pull_request?.user.login} \n 
+        • 리뷰어: ${reviewer} \n 
+        • 리뷰하러가기 >> click`,
+      },
+    },
+  ];
 };
 
 main();

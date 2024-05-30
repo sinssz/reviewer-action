@@ -5,7 +5,11 @@ on:
   workflow_dispatch:
     inputs:
       github_token:
-        default: asdasd
+        required: true
+        default:
+      slack_token:
+        required: true
+        default:
 
 jobs:
   random-reviewer:
@@ -38,4 +42,5 @@ jobs:
       - name: run random reviewer
         env:
           github_token: ${{secrets.GITHUBCLIENT_TOKEN}}
+          slack_token: ${{secrets.SLACK_TOKEN}}
         run: npm run reviewer
