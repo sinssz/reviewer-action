@@ -26,55 +26,77 @@ function main() {
   const githubClient = getOctokit(token);
   console.log("githubClient : ", githubClient);
 
-  const { reviewers } = getReviewers(yml) as {
-    reviewers: Reviewer[];
+  const { codeOwners } = getCodeOwners(yml) as {
+    codeOwners: Reviewer[];
   };
 
+  // pr 작성자
   const creator = context?.payload?.pull_request?.user.login;
-  let candidates = reviewers.filter((reviewer) => {
-    return true;
+
+  // pr 작성자를 제외한 멤버
+  let candidates = codeOwners.filter((reviewer) => {
     return reviewer.githubName !== creator;
   });
 
-  if (candidates.length > 0) {
-    const firstReviewer = getRandomReviewer(candidates);
-    candidates.splice(firstReviewer.index, 1);
-    const secondReviewer = getRandomReviewer(candidates);
+  // 요청할 리뷰어가 없을 경우 종료
+  if (!candidates.length) return;
 
-    [firstReviewer, secondReviewer].forEach(async (reviewer) => {
-      await githubClient.rest.pulls.requestReviewers({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        pull_number: context.issue.number,
-        reviewers: [reviewer.githubName],
-      });
+  const reviewers = getReviewers(candidates, 2);
 
-      sendDirectMessage({
-        githubName: reviewer.githubName,
-        slackUserId: reviewer.slackUserId,
-      });
+  reviewers.forEach(async (reviewer) => {
+    await githubClient.rest.pulls.requestReviewers({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      pull_number: context.issue.number,
+      reviewers: [reviewer.githubName],
     });
-  }
+
+    sendDirectMessage({
+      githubName: reviewer.githubName,
+      slackUserId: reviewer.slackUserId,
+    });
+  });
+
+  // if (candidates.length > 0) {
+  //   const firstReviewer = getRandomReviewer(candidates);
+  //   candidates.splice(firstReviewer.index, 1);
+  //   const secondReviewer = getRandomReviewer(candidates);
+
+  //   [firstReviewer, secondReviewer].forEach(async (reviewer) => {
+  //     await githubClient.rest.pulls.requestReviewers({
+  //       owner: context.repo.owner,
+  //       repo: context.repo.repo,
+  //       pull_number: context.issue.number,
+  //       reviewers: [reviewer.githubName],
+  //     });
+
+  //     sendDirectMessage({
+  //       githubName: reviewer.githubName,
+  //       slackUserId: reviewer.slackUserId,
+  //     });
+  //   });
+  // }
 }
 
 const sendDirectMessage = async (reviewer: Reviewer) => {
+  console.log("Send Message!!");
   // slackClient.chat.postMessage({
   //   text: createMessage(github.context),
   //   channel: reviewer.slackUserId,
   // });
 };
 
-const getRandomReviewer = (candidates: Reviewer[]) => {
-  const memberIndex = Math.floor(Math.random() * candidates.length);
-  return {
-    githubName: candidates[memberIndex].githubName,
-    slackUserId: candidates[memberIndex].slackUserId,
-    index: memberIndex,
-  };
-};
+// const getRandomReviewer = (candidates: Reviewer[]) => {
+//   const memberIndex = Math.floor(Math.random() * candidates.length);
+//   return {
+//     githubName: candidates[memberIndex].githubName,
+//     slackUserId: candidates[memberIndex].slackUserId,
+//     index: memberIndex,
+//   };
+// };
 
 // YAML 파일 읽기
-const getReviewers = (filePath: string) => {
+const getCodeOwners = (filePath: string) => {
   try {
     const fileContents = fs.readFileSync(filePath, "utf8");
     const data = yaml.load(fileContents);
@@ -83,6 +105,19 @@ const getReviewers = (filePath: string) => {
     console.error(`Error reading YAML file: ${error}`);
     return null;
   }
+};
+
+const getReviewers = (candidates: Reviewer[], memberCnt: number) => {
+  const maxElements = Math.min(memberCnt, candidates.length);
+  const selectedElements: Reviewer[] = [];
+
+  for (let i = 0; i < maxElements; i++) {
+    const randomIndex = Math.floor(Math.random() * candidates.length);
+    selectedElements.push(candidates[randomIndex]);
+    candidates.splice(randomIndex, 1);
+  }
+
+  return selectedElements;
 };
 
 main();
