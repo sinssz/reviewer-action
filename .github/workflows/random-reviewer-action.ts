@@ -1,5 +1,5 @@
 import { context, getOctokit } from "@actions/github";
-import { getInput } from "@actions/core";
+import { getInput, setFailed } from "@actions/core";
 import * as fs from "fs";
 import * as path from "path";
 import * as yaml from "js-yaml";
@@ -15,8 +15,14 @@ const yml = path.join(__dirname, "../../", "reviewer.yml");
 function main() {
   console.log("random job step start");
 
-  const token = getInput("github_token");
-  console.log("token : ", token, process.env.github_token);
+  const token =
+    getInput("github_token") || process.env.github_token?.toString();
+
+  if (!token) {
+    setFailed("github client token is not set");
+    return;
+  }
+
   const githubClient = getOctokit(token);
   console.log("githubClient : ", githubClient);
 
