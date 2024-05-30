@@ -4,7 +4,7 @@ on:
     types: [opened]
   workflow_dispatch:
     inputs:
-      SECRET_GITHUB_TOKEN:
+      github_token:
         default: asdasd
 
 jobs:
@@ -37,5 +37,5 @@ jobs:
       #
       - name: run random reviewer
         env:
-          SECRET_GITHUB_TOKEN: ${{secrets.SECRET_GITHUB_TOKEN}}
+          github_token: ${{secrets.SECRET_GITHUB_TOKEN}}
         run: npm run reviewer
