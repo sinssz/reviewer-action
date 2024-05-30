@@ -1,0 +1,12 @@
+{
+  "name": "reviewer-action",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "reviewer": "npx ts-node .github/workflows/random-reviewer-action.ts"
+  },
+  "author": "",
+  "license": "ISC"
+}

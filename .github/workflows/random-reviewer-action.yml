@@ -1,0 +1,9 @@
+name: random-reviewer
+on: workflow_dispatch
+jobs:
+  random-reviewer:
+    runs-on: ubuntu-latest
+    steps:
+      #
+      - name: run random reviewer
+        run: npm run reviewer
