@@ -2,5 +2,5 @@ reviewers:
   - githubName: sinssz
     slackUserId: sinssz_slack
 
-  - githubName: test
-    slackUserId: test_slack
+  # - githubName: test
+  #   slackUserId: test_slack
