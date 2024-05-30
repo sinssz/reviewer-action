@@ -16,7 +16,7 @@ function main() {
   console.log("random job step start");
 
   const token = getInput("github_token");
-  console.log("token : ", token);
+  console.log("token : ", token, process.env.github_token);
   const githubClient = getOctokit(token);
   console.log("githubClient : ", githubClient);
 
