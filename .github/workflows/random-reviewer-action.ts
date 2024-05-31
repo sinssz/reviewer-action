@@ -14,8 +14,6 @@ interface Reviewer {
 const yml = path.join(__dirname, "../../", "reviewer.yml");
 
 function main() {
-  console.log("random job step start");
-
   const githubClientToken =
     getInput("github_token") || process.env.github_token?.toString();
 
@@ -67,8 +65,8 @@ const sendDirectMessage = async (reviewer: Reviewer) => {
   const slackClient = new WebClient(slackToken);
 
   await slackClient.chat.postMessage({
-    channel: "U04LLUMDL31",
-    blocks: getSlackMessageBlock(reviewer.githubName),
+    channel: reviewer.slackUserId,
+    text: createMessage(reviewer.githubName),
   });
 };
 
@@ -97,30 +95,13 @@ const getReviewers = (candidates: Reviewer[], memberCnt: number) => {
   return selectedElements;
 };
 
-const getSlackMessageBlock = (reviewer: string): (Block | KnownBlock)[] => {
-  console.log(
-    context?.payload?.pull_request?._links,
-    context?.payload?.pull_request?.user
-  );
-  return [
-    {
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text: "리뷰어로 할당되었습니다!!🙏",
-      },
-    },
-    {
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text: `• PR 제목: ${context?.payload?.pull_request?.user.login} \n 
-        • 담당자: ${context?.payload?.pull_request?.user.login} \n 
-        • 리뷰어: ${reviewer} \n 
-        • 리뷰하러가기 >> click`,
-      },
-    },
-  ];
+const createMessage = (reviewer: string) => {
+  return `
+  리뷰어로 할당되었습니다!!🙏
+  • PR 제목: ${context?.payload?.pull_request?.user.login}
+  • 담당자: ${context?.payload?.pull_request?.user.login}
+  • 리뷰어: ${reviewer}
+  • 리뷰하러가기 >> <${context?.payload?.html_url}|Click!>`;
 };
 
 main();
