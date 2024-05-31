@@ -8,6 +8,7 @@ import { Block, KnownBlock, WebClient } from "@slack/web-api";
 interface Reviewer {
   githubName: string;
   slackUserId: string;
+  name: string;
 }
 
 // YAML 파일 경로 설정
@@ -55,6 +56,7 @@ function main() {
     sendDirectMessage({
       githubName: reviewer.githubName,
       slackUserId: reviewer.slackUserId,
+      name: reviewer.name,
     });
   });
 }
@@ -66,7 +68,7 @@ const sendDirectMessage = async (reviewer: Reviewer) => {
 
   await slackClient.chat.postMessage({
     channel: reviewer.slackUserId,
-    text: createMessage(reviewer.githubName),
+    text: createMessage(reviewer.name),
   });
 };
 
@@ -95,13 +97,13 @@ const getReviewers = (candidates: Reviewer[], memberCnt: number) => {
   return selectedElements;
 };
 
-const createMessage = (reviewer: string) => {
+const createMessage = (reviewerName: string) => {
   return `
   리뷰어로 할당되었습니다!!🙏
-  • PR 제목: ${context?.payload?.pull_request?.user.login}
+  • PR 제목: ${context?.payload?.pull_request?.title}
   • 담당자: ${context?.payload?.pull_request?.user.login}
-  • 리뷰어: ${reviewer}
-  • 리뷰하러가기 >> <${context?.payload?.html_url}|Click!>`;
+  • 리뷰어: ${reviewerName}
+  • 리뷰하러가기 >> <${context?.payload?.pull_request?.html_url}|Click!>`;
 };
 
 main();
